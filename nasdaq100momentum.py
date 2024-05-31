@@ -8,6 +8,9 @@ import streamlit as st
 from datetime import datetime
 import numpy as np
 
+# Log the environment
+st.write(f"Environment: {st.secrets['environment']}")
+
 def get_nasdaq100_stocks():
     url = "https://en.wikipedia.org/wiki/NASDAQ-100"
     response = requests.get(url)
@@ -23,15 +26,18 @@ def get_nasdaq100_stocks():
 
 nasdaq100_stocks = get_nasdaq100_stocks()
 
-def fetch_stock_data(ticker):
+def fetch_stock_data(ticker, end_date):
     stock = yf.Ticker(ticker)
-    data = stock.history(period="max", interval="1mo")
+    data = stock.history(period="max", interval="1mo", end=end_date)
     return data
+
+# Fixed end date for data fetching to ensure consistency
+end_date = '2024-05-01'
 
 stocks = []
 for stock in nasdaq100_stocks:
     try:
-        stocks.append(fetch_stock_data(stock))
+        stocks.append(fetch_stock_data(stock, end_date))
     except Exception as e:
         print(f"Error fetching data for {stock}: {e}")
         pass
@@ -41,7 +47,7 @@ nasdaq = yf.Ticker('^NDX')
 
 data = pd.concat(stocks, keys=nasdaq100_stocks, names=['Ticker', 'Date'])
 data = data['Close'].unstack(level=0)
-data['NASDAQ'] = nasdaq.history(period="max", interval="1mo")['Close']
+data['NASDAQ'] = nasdaq.history(period="max", interval="1mo", end=end_date)['Close']
 data['Date'] = data.index
 data['Date'] = pd.to_datetime(data['Date'])
 data = data.fillna(-1)
@@ -57,7 +63,7 @@ top15 = filtered_data.nlargest(15)
 nasdaq = yf.Ticker('^NDX')
 
 # Find the 1-year momentum
-nasdaq_data = nasdaq.history(period="1y", interval="1mo")
+nasdaq_data = nasdaq.history(period="1y", interval="1mo", end=end_date)
 nasdaq_data['Date'] = nasdaq_data.index
 nasdaq_data['Date'] = pd.to_datetime(nasdaq_data['Date'])
 nasdaq_data = nasdaq_data.set_index('Date')
