@@ -50,7 +50,7 @@ data = data.set_index('Date')
 rollingPctChange = data.pct_change(9)
 rollingPctChange = rollingPctChange.fillna(-1)
 
-filtered_data = rollingPctChange.iloc[-2][rollingPctChange.iloc[-2] > 0.02]
+filtered_data = rollingPctChange.iloc[-1][rollingPctChange.iloc[-1] > 0.02]
 top15 = filtered_data.nlargest(15)
 
 # Find the NASDAQ price data
