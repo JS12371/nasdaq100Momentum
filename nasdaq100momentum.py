@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from io import StringIO
 import streamlit as st
 from datetime import datetime
+import numpy as np
 
 def get_nasdaq100_stocks():
     url = "https://en.wikipedia.org/wiki/NASDAQ-100"
@@ -136,17 +137,22 @@ if len(top15) > 0:
     # Create a DataFrame to display the weights
     holdings_df = pd.DataFrame({'Ticker': top15.index, 'Weight (%)': weights_percentage})
     if cash_weight_percentage > 0:
-        holdings_df = holdings_df.append({'Ticker': 'Cash', 'Weight (%)': cash_weight_percentage}, ignore_index=True)
+        cash_df = pd.DataFrame({'Ticker': ['Cash'], 'Weight (%)': [cash_weight_percentage]})
+        holdings_df = pd.concat([holdings_df, cash_df], ignore_index=True)
 
     st.table(holdings_df)
 
     # Display a bar chart with the calculated weights
     fig, ax = plt.subplots()
-    ax.bar(holdings_df['Ticker'], holdings_df['Weight (%)'])
+    colors = plt.cm.tab20(np.linspace(0, 1, len(holdings_df)))  # Different colors for each bar
+
+    ax.bar(holdings_df['Ticker'], holdings_df['Weight (%)'], color=colors)
     ax.set_xlabel('Ticker')
     ax.set_ylabel('Weight (%)')
     ax.set_title('Portfolio Weights Distribution')
     ax.set_xticklabels(holdings_df['Ticker'], rotation=90)  # Rotate tickers to vertical
+    ax.set_facecolor('none')  # Remove background color
+    fig.patch.set_facecolor('none')  # Remove background color
     st.pyplot(fig)
 
     # Calculate the portfolio value at the last rebalance date and the current date
