@@ -109,14 +109,24 @@ if len(top15) > 0:
             percent_returns.append(None)
 
     holdings_df = pd.DataFrame({'Ticker': top15.index, 'Percent Return': percent_returns})
+
+    # Calculate updated weights
+    original_weights = [1/len(top15)] * len(top15)
+    updated_weights = [(w * (1 + pr/100)) for w, pr in zip(original_weights, percent_returns)]
+    normalized_weights = [w / sum(updated_weights) for w in updated_weights]
+
+    holdings_df['Updated Weight'] = normalized_weights
+
+    total_return = sum([pr for pr in percent_returns if pr is not None])
     st.table(holdings_df)
 
-    # Display a pie chart with equal weights for each holding
+    # Display a pie chart with updated weights for each holding
     fig, ax = plt.subplots()
-    ax.pie([1]*len(top15), labels=top15.index, autopct='%1.1f%%', startangle=90)
+    ax.pie(normalized_weights, labels=top15.index, autopct='%1.1f%%', startangle=90)
     ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
     st.pyplot(fig)
     
     st.write(f"**Last Rebalanced on:** {last_rebalance_date.strftime('%B %d, %Y')}")
+    st.write(f"**Total Return Over Current Period:** {total_return:.2f}%")
 else:
     st.write("No stocks currently held in the portfolio.")
