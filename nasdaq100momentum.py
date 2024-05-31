@@ -13,7 +13,6 @@ def get_nasdaq100_stocks():
     soup = BeautifulSoup(response.text, 'html.parser')
     table = soup.find('table', {'id': 'constituents'})
     
-    # Wrap the HTML string in StringIO before passing it to read_html
     html_string = str(table)
     html_io = StringIO(html_string)
     
@@ -25,7 +24,7 @@ nasdaq100_stocks = get_nasdaq100_stocks()
 def fetch_stock_data(ticker):
     stock = yf.Ticker(ticker)
     data = stock.history(period="max", interval="1mo")
-    return data
+    return data[['Close']]
 
 stocks = []
 for stock in nasdaq100_stocks:
@@ -48,7 +47,7 @@ data = data.set_index('Date')
 rollingPctChange = data.pct_change(9)
 rollingPctChange = rollingPctChange.fillna(-1)
 
-filtered_data = rollingPctChange.iloc[-2][rollingPctChange.iloc[-2] > 0.02]
+filtered_data = rollingPctChange.iloc[-1][rollingPctChange.iloc[-1] > 0.02]
 top15 = filtered_data.nlargest(15)
 
 # Find the NASDAQ price data
@@ -86,7 +85,6 @@ st.write("### Current Portfolio Holdings")
 
 # Display the current holdings in a table
 if len(top15) > 0:
-    # Find the most recent rebalance date
     today = datetime.today()
     rebalance_dates = [
         datetime(today.year, 1, 1),
@@ -110,7 +108,6 @@ if len(top15) > 0:
 
     holdings_df = pd.DataFrame({'Ticker': top15.index, 'Percent Return': percent_returns})
 
-    # Calculate updated weights
     original_weights = [1/len(top15)] * len(top15)
     updated_weights = [(w * (1 + pr/100)) for w, pr in zip(original_weights, percent_returns)]
     normalized_weights = [w / sum(updated_weights) for w in updated_weights]
@@ -123,7 +120,7 @@ if len(top15) > 0:
     # Display a pie chart with updated weights for each holding
     fig, ax = plt.subplots()
     ax.pie(normalized_weights, labels=top15.index, autopct='%1.1f%%', startangle=90)
-    ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+    ax.axis('equal')
     st.pyplot(fig)
     
     st.write(f"**Last Rebalanced on:** {last_rebalance_date.strftime('%B %d, %Y')}")
