@@ -151,8 +151,6 @@ if len(top15) > 0:
     ax.set_ylabel('Weight (%)')
     ax.set_title('Portfolio Weights Distribution')
     ax.set_xticklabels(holdings_df['Ticker'], rotation=90)  # Rotate tickers to vertical
-    ax.set_facecolor('none')  # Remove background color
-    fig.patch.set_facecolor('none')  # Remove background color
     st.pyplot(fig)
 
     # Calculate the portfolio value at the last rebalance date and the current date
