@@ -129,7 +129,7 @@ if len(top15) > 0:
 
     holdings_df['Updated Weight'] = normalized_weights
 
-    total_return = sum([pr for pr in percent_returns if pr is not None])
+    total_return = sum([pr/15 for pr in percent_returns if pr is not None])
     st.table(holdings_df)
 
     # Display a pie chart with updated weights for each holding
