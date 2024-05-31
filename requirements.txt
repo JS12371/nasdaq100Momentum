@@ -1,6 +1,6 @@
-requests
-beautifulsoup4
-pandas
-yfinance
-matplotlib
-streamlit
+requests==2.25.1
+beautifulsoup4==4.9.3
+pandas==1.2.4
+yfinance==0.1.55
+matplotlib==3.3.4
+streamlit==0.81.1
