@@ -26,6 +26,21 @@ def fetch_stock_data(ticker):
     data = stock.history(period="max", interval="1mo")
     return data[['Close']]
 
+def get_lookback_period():
+    i = 0
+
+    ##need i to be 1 if the month is january, april, july, or october
+    ##need i to be 2 if the month is february, may, august, or november
+    ##need i to be 3 if the month is march, june, september, or december
+
+    if datetime.now().month in [1, 4, 7, 10]:
+        i = 1
+    elif datetime.now().month in [2, 5, 8, 11]:
+        i = 2
+    else:
+        i = 3
+    return i
+
 stocks = []
 for stock in nasdaq100_stocks:
     try:
@@ -47,7 +62,7 @@ data = data.set_index('Date')
 rollingPctChange = data.pct_change(9)
 rollingPctChange = rollingPctChange.fillna(-1)
 
-filtered_data = rollingPctChange.iloc[-1][rollingPctChange.iloc[-1] > 0.02]
+filtered_data = rollingPctChange.iloc[-get_lookback_period()][rollingPctChange.iloc[-get_lookback_period()] > 0.02]
 top15 = filtered_data.nlargest(15)
 
 # Find the NASDAQ price data
@@ -63,7 +78,7 @@ nasdaq_data['momentum1yr'] = nasdaq_data['Close'].pct_change(12)
 # Find the 6-month momentum
 nasdaq_data['momentum6mo'] = nasdaq_data['Close'].pct_change(6)
 
-if nasdaq_data['momentum1yr'].iloc[-1] < 0 and nasdaq_data['momentum6mo'].iloc[-1] < -.05:
+if nasdaq_data['momentum1yr'].iloc[-get_lookback_period()] < 0 and nasdaq_data['momentum6mo'].iloc[-get_lookback_period()] < -.05:
     st.write("## Sell all stocks")
     top15 = []
 
@@ -125,5 +140,6 @@ if len(top15) > 0:
     
     st.write(f"**Last Rebalanced on:** {last_rebalance_date.strftime('%B %d, %Y')}")
     st.write(f"**Total Return Over Current Period:** {total_return:.2f}%")
+    st.write(f"lookback {get_lookback_period() - 1} months")
 else:
     st.write("No stocks currently held in the portfolio.")
