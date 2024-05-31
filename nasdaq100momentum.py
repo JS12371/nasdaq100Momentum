@@ -140,6 +140,5 @@ if len(top15) > 0:
     
     st.write(f"**Last Rebalanced on:** {last_rebalance_date.strftime('%B %d, %Y')}")
     st.write(f"**Total Return Over Current Period:** {total_return:.2f}%")
-    st.write(f"lookback {get_lookback_period() - 1} months")
 else:
     st.write("No stocks currently held in the portfolio.")
